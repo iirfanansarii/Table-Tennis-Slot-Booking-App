@@ -5,11 +5,13 @@ const router = require('express').Router();
 const {
   bookGameSlot,
   editNewGameSlot,
+  getAllBookedSlot,
 } = require('../controller/gameSlotController');
 
 // router
-router.put('/user/new/game/slot', editNewGameSlot);
-router.post('/game/new/bookGameSlot', bookGameSlot);
+router.post('/book/new/slot', bookGameSlot);
+router.put('/game/slot', editNewGameSlot);
+router.get('/game/slots/:userId', getAllBookedSlot);
 
 // export router
 module.exports = router;

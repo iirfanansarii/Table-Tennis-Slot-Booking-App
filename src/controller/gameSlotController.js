@@ -7,7 +7,7 @@ const slotEditTimeLimit = process.env.GAME_SLOT_EDIT_TIME_LIMIT;
 // constant error messages
 const {
   mongodberror,
-  matchSlotBooked,
+  newSlotBooked,
   slotsCantEdited,
   invalidUser,
   gameSlotHasBooked,
@@ -17,6 +17,8 @@ const {
   addingNewSlotToExistingFailed,
   cantBookSlotInPast,
   invalidSlot,
+  gameSlotsFetched,
+  userIdNotFound,
 } = require('../contants/constantErrorMessages');
 
 // date time to epoch
@@ -28,7 +30,34 @@ const {
 
 // Book game slot
 exports.bookGameSlot = (req, res) => {
-  const { userId, duration, bookingDateTime } = req.body;
+  const { userId, duration, bookingDateTime, gameName, description } = req.body;
+  
+  if (!userId) {
+    return res.status(500).json({
+      message: "Please login and try again..!!",
+    });
+  }
+  if (!duration) {
+    return res.status(500).json({
+      message: 'Please enter duration..!!',
+    });
+  }
+  if (!bookingDateTime) {
+    return res.status(500).json({
+      message: 'Please enter booking datetime..!!',
+    });
+  }
+  if (!gameName) {
+    return res.status(500).json({
+      message: 'Please enter game name..!!',
+    });
+  }
+  if (!description) {
+    return res.status(500).json({
+      message: 'Please enter descriptin..!!',
+    });
+  }
+
   const currentDateTime = DATETIMETOEPOC(new Date());
   const currentBookingTime = currentDateTime.valueOf();
   const slotBookingTime = DATETIMETOEPOC(bookingDateTime);
@@ -93,11 +122,19 @@ exports.bookGameSlot = (req, res) => {
               let condition = { userId: userId };
               let update = {
                 $push: {
-                  bookingDateTime: { slotStartTime, slotEndingTime },
+                  bookingDateTime: {
+                    slotStartTime,
+                    slotEndingTime,
+                    gameName,
+                    description,
+                    duration,
+                  },
                 },
               };
               gameSlots
-                .findOneAndUpdate(condition, update)
+                .findOneAndUpdate(condition, update, {
+                  new: true,
+                })
                 .exec((err, newSlotAdded) => {
                   if (err) {
                     return res.status(500).json({
@@ -107,10 +144,15 @@ exports.bookGameSlot = (req, res) => {
                     });
                   }
                   if (newSlotAdded) {
+                    const { bookingDateTime } = newSlotAdded;
+                    const newSlot =
+                      bookingDateTime.length > 1
+                        ? bookingDateTime[bookingDateTime.length - 1]
+                        : undefined;
                     return res.status(200).json({
                       status: 1,
                       message: newSlotAddedToExistingGameslot,
-                      slotAdded: newSlotAdded,
+                      slot: newSlot,
                     });
                   } else {
                     return res.status(400).json({
@@ -124,7 +166,15 @@ exports.bookGameSlot = (req, res) => {
             const addGameSlot = new gameSlots({
               userId,
               duration,
-              bookingDateTime: [{ slotStartTime, slotEndingTime }],
+              bookingDateTime: [
+                {
+                  slotStartTime,
+                  slotEndingTime,
+                  gameName,
+                  description,
+                  duration,
+                },
+              ],
             });
             addGameSlot.save((err, gameSlotAdded) => {
               if (err) {
@@ -135,10 +185,14 @@ exports.bookGameSlot = (req, res) => {
                 });
               }
               if (gameSlotAdded) {
-                return res.status(201).json({
+                console.log('====> gameSlotAdded', gameSlotAdded);
+                const { bookingDateTime } = gameSlotAdded;
+                console.log('====> bookingDateTime', bookingDateTime);
+
+                return res.status(200).json({
                   status: 1,
-                  message: matchSlotBooked,
-                  slot: gameSlotAdded,
+                  message: newSlotBooked,
+                  slot: bookingDateTime[0],
                 });
               }
             });
@@ -185,9 +239,17 @@ exports.editNewGameSlot = (req, res) => {
       gameSlots
         .find({
           $and: [
-            { userId: {$eq:userId }},
-            { 'bookingDateTime.slotStartTime': {$eq:existingSlotStartTimeValue }},
-            { 'bookingDateTime.slotEndingTime': {$eq:existingSlotEndTimeValue} },
+            { userId: { $eq: userId } },
+            {
+              'bookingDateTime.slotStartTime': {
+                $eq: existingSlotStartTimeValue,
+              },
+            },
+            {
+              'bookingDateTime.slotEndingTime': {
+                $eq: existingSlotEndTimeValue,
+              },
+            },
           ],
         })
         .exec((err, existingSlotVerified) => {
@@ -341,6 +403,35 @@ exports.editNewGameSlot = (req, res) => {
       return res.status(400).json({
         status: 0,
         message: invalidUser,
+      });
+    }
+  });
+};
+
+// get all book slot by user id
+exports.getAllBookedSlot = (req, res) => {
+  const { userId } = req.params;
+  if (!userId) {
+    return res.status(400).json({
+      error: userIdNotFound,
+    });
+  }
+  gameSlots.findOne({ userId: userId }).exec((err, user) => {
+    if (err) {
+      return res.status(500).json({
+        message: mongodberror,
+        error: err,
+      });
+    }
+    if (user) {
+      return res.status(200).json({
+        messsage: gameSlotsFetched,
+        records: user.bookingDateTime.length,
+        slots: user.bookingDateTime,
+      });
+    } else {
+      return res.status(400).json({
+        error: invalidUser,
       });
     }
   });

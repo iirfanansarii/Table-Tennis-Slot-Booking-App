@@ -8,14 +8,27 @@ const bookingGameSlotSchema = new mongoose.Schema(
       type: String,
       ref: 'User',
     },
-    duration: {
-      type: Number,
-      require: true,
-      min: 10,
-      max: 60,
-    },
     bookingDateTime: [
       {
+        gameName: {
+          type: String,
+          required: true,
+          max: 30,
+          min: 10,
+          trim: true,
+        },
+        description: {
+          type: String,
+          required: true,
+          max: 50,
+          min: 5,
+        },
+        duration: {
+          type: Number,
+          require: true,
+          min: 10,
+          max: 60,
+        },
         slotStartTime: {
           type: Number,
         },

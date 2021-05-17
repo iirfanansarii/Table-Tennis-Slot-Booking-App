@@ -1,6 +1,6 @@
 module.exports = {
   mongodberror: 'Mongodb error',
-  matchSlotBooked: 'Your slots booked successfully..!!',
+  newSlotBooked: 'Your slots booked successfully..!!',
   userCreated: 'User created successfully..!!',
   userNameExist: 'Username already exists',
   userLoggedIn: 'User logged in successfully..!!',
@@ -15,5 +15,9 @@ module.exports = {
   addingNewSlotToExistingFailed:
     'Adding new slot to existing gameslot got failed',
   cantBookSlotInPast: 'You can not book slot in the past..!',
-  invalidSlot: 'Slot does not exist..!'
+  invalidSlot: 'Slot does not exist..!',
+  userCreationFailed: 'User creation got failed..!!',
+  gameSlotsFetched: 'Game slots fethed successfully..!!',
+  invalidUser: 'Invalid user..!!',
+  userIdNotFound: 'User id not found',
 };
