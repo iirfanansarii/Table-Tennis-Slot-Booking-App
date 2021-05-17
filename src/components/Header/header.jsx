@@ -9,6 +9,7 @@ import TitleIcon from '@material-ui/icons/Title';
 import { Box, Container, Link } from '@material-ui/core';
 import { pagePaths } from '../../utils/constants';
 import AddNewSlot from '../AddNewSlot/AddNewSlot';
+import CloseIcon from '@material-ui/icons/Close';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -70,7 +71,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Header() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleClose = () => {
     setOpen(false);
   };

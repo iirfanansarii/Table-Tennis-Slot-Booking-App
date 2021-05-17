@@ -3,59 +3,24 @@ import React from 'react';
 import SlotCard from '../../components/BookingSlotCard/SlotCard';
 import Layout from '../../components/Layout';
 import useStyles from '../../Styles/home';
-
+import { useDispatch, useSelector } from 'react-redux';
+import { getInitialSlotData } from '../../actions/slotActions';
 function Home() {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  const slotReducer = useSelector((rootReducer) => rootReducer.slotReducer);
 
-  const slots = [
-    {
-      id: '1',
-      heading: 'Game Heading Line1',
-      duration: '60 mins',
-      day: 'Sunday',
-      date: '24/05/202:00:00:00',
-    },
-    {
-      id: '2',
-      heading: 'Game Heading Line2',
-      duration: '60 mins',
-      day: 'Sunday',
-      date: '24/05/202:00:00:00',
-    },
-    {
-      id: '3',
-      heading: 'Game Heading Line3',
-      duration: '60 mins',
-      day: 'Sunday',
-      date: '24/05/202:00:00:00',
-    },
-    {
-      id: '4',
-      heading: 'Game Heading Line4',
-      duration: '60 mins',
-      day: 'Sunday',
-      date: '24/05/202:00:00:00',
-    },
-    {
-      id: '5',
-      heading: 'Game Heading Line5',
-      duration: '60 mins',
-      day: 'Sunday',
-      date: '24/05/202:00:00:00',
-    },
-    {
-      id: '6',
-      heading: 'Game Heading Line6',
-      duration: '60 mins',
-      day: 'Sunday',
-      date: '24/05/202:00:00:00',
-    },
-  ];
+  const userId = localStorage.getItem('userId');
+
+  const slots = slotReducer.slots;
+  React.useEffect(() => {
+    dispatch(getInitialSlotData(userId));
+  }, []);
 
   const renderSlots = () => {
     return slots.map((slot, i) => (
-      <Grid item xs={12} sm={6} md={4} lg={4} xl={4}>
-        <SlotCard />
+      <Grid item xs={12} sm={6} md={4} lg={4} xl={4} key={i}>
+        <SlotCard slot={slot} />
       </Grid>
     ));
   };
