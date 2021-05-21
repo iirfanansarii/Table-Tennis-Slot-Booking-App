@@ -10,6 +10,7 @@ import { signup } from '../../actions/userActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { severities } from '../../utils/constants';
 import CustomSnackbar from '../../components/CustomSnackbar';
+import { Dialog } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -28,56 +29,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SignUp() {
+export default function SignUp({ handleClose, open }) {
+  const classes = useStyles();
   const [firstname, setFirstName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
-  const userReducer = useSelector((rootReducer) => rootReducer.userReducer);
-  const { error, message, loading } = userReducer;
-  // const [messages, setMessages] = useState({ ...userReducer });
-  const handleClose = () => {
-    setSnackbar({
-      ...snackbar,
-      open: false,
-    });
-  };
-  const [snackbar, setSnackbar] = React.useState({
-    open: false,
-    handleClose: handleClose,
-    severity: severities.info,
-    message: 'Oops! something went wrong',
-  });
-let option = {
-  ...snackbar,
-};
-  if (!userReducer.loading && userReducer.error && userReducer.error !== '') {
-    option.open = true;
-    option.message = 'Loading...';
-    option.severity = severities.info;  
-  }
 
-  const handleMessages = () => {
-    let option = {
-      ...snackbar,
-    };
-    if (loading) {
-      option.open = true;
-      option.message = 'Loading...';
-      option.severity = severities.info;
-    } else if (error) {
-      option.open = true;
-      option.message = error;
-      option.severity = severities.warning;
-    } else if (message) {
-      option.open = true;
-      option.message = message;
-      option.severity = severities.success;
-    }
-    setSnackbar(option);
-  };
-  
-
+  // dispatch user data with signup action
   const userSignup = (e) => {
     e.preventDefault();
     const user = {
@@ -85,72 +44,109 @@ let option = {
       username,
       password,
     };
-    dispatch(signup(user)).then(() => {
-      setSnackbar(option);
-      handleMessages();
+    dispatch(signup(user)).then((res) => {
+      const { status, message } = res;
+      if (status === 200) {
+        handleClose();
+        setSnackbar({
+          ...snackbar,
+          open: true,
+          message,
+          severity: severities.success,
+        });
+      }
+      if (status === 400) {
+        setSnackbar({
+          ...snackbar,
+          open: true,
+          message,
+          severity: severities.error,
+        });
+      }
     });
   };
-  const classes = useStyles();
+
+  //error handling  start
+  const closesSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    handleClose: closesSnackbar,
+    severity: severities.info,
+    message: 'Oops! something went wrong',
+  });
+  //error handling - end
+
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Typography component="h1" variant="h5">
-          Sign up
-        </Typography>
-        <form className={classes.form} noValidate onSubmit={userSignup}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                autoComplete="fname"
-                name="firstName"
-                variant="outlined"
-                required
-                fullWidth
-                value={firstname}
-                label="First Name"
-                autoFocus
-                onChange={(e) => setFirstName(e.target.value)}
-              />
+    <>
+      {snackbar.open && <CustomSnackbar {...snackbar} />}
+      <Dialog
+        onClose={handleClose}
+        aria-labelledby="simple-dialog-title"
+        open={open}
+      ></Dialog>
+
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Typography component="h1" variant="h5">
+            Sign up
+          </Typography>
+          <form className={classes.form} noValidate onSubmit={userSignup}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  autoComplete="fname"
+                  name="firstName"
+                  variant="outlined"
+                  required
+                  fullWidth
+                  value={firstname}
+                  label="First Name"
+                  autoFocus
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  required
+                  fullWidth
+                  label="Username"
+                  name="username"
+                  value={username}
+                  autoComplete="username"
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  value={password}
+                  autoComplete="current-password"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                label="Username"
-                name="username"
-                value={username}
-                autoComplete="username"
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                value={password}
-                autoComplete="current-password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Grid>
-          </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            Sign Up
-          </Button>
-        </form>
-      </div>
-      <CustomSnackbar {...snackbar} />
-    </Container>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              Sign Up
+            </Button>
+          </form>
+        </div>
+        <CustomSnackbar {...snackbar} />
+      </Container>
+    </>
   );
 }

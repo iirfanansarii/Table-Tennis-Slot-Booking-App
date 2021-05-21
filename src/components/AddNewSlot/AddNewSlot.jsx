@@ -86,7 +86,7 @@ export default function AddNewSlot({ handleClose, open }) {
       }
     });
   };
-  //error handling 
+  //error handling  start
   const closesSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -139,6 +139,7 @@ export default function AddNewSlot({ handleClose, open }) {
                       defaultValue="2017-05-24T10:30"
                       name="Slot Start Time"
                       value={bookingDateTime}
+                      // label="Booking DateTime"
                       autoComplete="slotStartTime"
                       onChange={(e) => setBookingDateTime(e.target.value)}
                     />

@@ -10,7 +10,7 @@ export const addSlot = (slot) => {
       message: '',
       data: '',
       res: '',
-    }
+    };
     try {
       const res = await axios.post(`/book/new/slot`, { ...slot });
       actionResponse.res = res;
@@ -18,15 +18,15 @@ export const addSlot = (slot) => {
       const statusCode = status;
       if (statusCode === 200) {
         const { slot, message } = res.data;
-         actionResponse.status = statusCode;
-         actionResponse.message = message;
-          dispatch({
-           type: addSlotConstants.SLOT_BOOK_SUCCESS,
-           payload: {
-             slot: slot,
-             message: message,
-           },
-         });
+        actionResponse.status = statusCode;
+        actionResponse.message = message;
+        dispatch({
+          type: addSlotConstants.SLOT_BOOK_SUCCESS,
+          payload: {
+            slot: slot,
+            message: message,
+          },
+        });
       }
       return actionResponse;
     } catch (error) {
@@ -78,4 +78,3 @@ export const getInitialSlotData = (userId) => {
     }
   };
 };
-

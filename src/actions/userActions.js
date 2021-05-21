@@ -7,47 +7,40 @@ export const signup = (user) => {
     dispatch({
       type: userConstants.USER_REGISTER_REQUEST,
     });
-
+    let actionResponse = {
+      status: 0,
+      message: '',
+      data: '',
+      res: '',
+    };
     try {
       const res = await axios.post(`/user`, {
         ...user,
       });
-      if (res.status === 200) {
+      actionResponse.res = res;
+      const { status } = res;
+      const statusCode = status;
+      if (statusCode === 200) {
+        const { message } = res.data;
+        actionResponse.status = statusCode;
+        actionResponse.message = message;
         dispatch({
           type: userConstants.USER_REGISTER_SUCCESS,
-          payload: { message: res.data.message },
+          payload: { message: message },
         });
       }
+      return actionResponse;
     } catch (error) {
       const { response } = error;
       const statusCode = response.status;
-      switch (statusCode) {
-        case 400:
-          const { userExist, userNotCreated } = response.data;
-          if (userExist) {
-            dispatch({
-              type: userConstants.USER_NAME_EXIST,
-              payload: { error: userExist },
-            });
-          } else if (userNotCreated) {
-            dispatch({
-              type: userConstants.USER_REGISTER_FAILURE,
-              payload: { error: userNotCreated },
-            });
-          }
-          break;
-        case 500:
-          const { errors } = response.data.error;
-          const keys = Object.keys(errors);
-          const msg = keys.toString() + ' are required!';
-          dispatch({
-            type: userConstants.USER_REGISTER_MONGODB_ERROR,
-            payload: { error: msg },
-          });
-          break;
-        default:
-          break;
-      }
+      const { message } = response.data;
+      actionResponse.status = statusCode;
+      actionResponse.message = message;
+      dispatch({
+        type: userConstants.USER_REGISTER_FAILURE,
+        payload: { message: message ? message : 'Something went wrong' },
+      });
+      return actionResponse;
     }
   };
 };
