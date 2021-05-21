@@ -20,4 +20,11 @@ module.exports = {
   gameSlotsFetched: 'Game slots fethed successfully..!!',
   invalidUser: 'Invalid user..!!',
   userIdNotFound: 'User id not found',
+  gameNameMissing: 'Please enter game name..!!',
+  dateTimeMissing: 'Please enter booking datetime..!!',
+  durationMissing: 'Please enter duration..!!',
+  descriptionMissing: 'Please enter descriptin..!!',
+  firstnameMissing: 'Please enter your first name..!!',
+  usernameMissing: 'Please enter username..!!',
+  passwordMissing: 'Please enter password..!!',
 };

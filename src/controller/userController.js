@@ -9,48 +9,66 @@ const {
   userCreated,
   userNameExist,
   userLoggedIn,
+  firstnameMissing,
+  usernameMissing,
+  passwordMissing,
 } = require('../contants/constantErrorMessages');
 
 // signup
 exports.signup = (req, res) => {
-  User.findOne({ username: req.body.username }).exec((err, user) => {
-    if (err) {
-      return res.status(500).json({
-        status: 0,
-        message: mongodberror,
-        error: err,
-      });
-    }
-    if (user) {
-      return res.status(400).json({
-        status: 0,
-        userExist: userNameExist,
-      });
-    }
-    const { firstname, username, password } = req.body;
-    const saltRounds = 10;
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const hash = bcrypt.hashSync(password, salt);
-    const newUser = new User({ firstname, username, password: hash });
-    newUser.save((err, user) => {
+  const { firstname, username, password } = req.body;
+  if (!firstname){
+    return res.status(400).json({
+      message: firstnameMissing,
+    });
+  }
+  if(!username){
+    return res.status(400).json({
+      message: usernameMissing,
+    });
+  }
+  if(!password){
+    return res.status(400).json({
+      message: passwordMissing,
+    });
+  }
+    User.findOne({ username: username }).exec((err, user) => {
       if (err) {
         return res.status(500).json({
+          status: 0,
           message: mongodberror,
           error: err,
         });
       }
       if (user) {
-        return res.status(200).json({
-          message: userCreated,
-          user,
-        });
-      } else {
         return res.status(400).json({
-          userNotCreated: userCreationFailed,
+          status: 0,
+          message: userNameExist,
         });
       }
+      const saltRounds = 10;
+      const salt = bcrypt.genSaltSync(saltRounds);
+      const hash = bcrypt.hashSync(password, salt);
+      const newUser = new User({ firstname, username, password: hash });
+      newUser.save((err, user) => {
+        if (err) {
+          return res.status(500).json({
+            message: mongodberror,
+            error: err,
+          });
+        }
+        if (user) {
+          return res.status(200).json({
+            message: userCreated,
+            user,
+          });
+        } else {
+          return res.status(400).json({
+            message: userCreationFailed,
+          });
+        }
+      });
     });
-  });
 };
 
 // function to create access token

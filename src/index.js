@@ -1,7 +1,8 @@
 const express = require('express');
+const serverless = require('serverless-http');
 const env = require('dotenv');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser'); 
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 app.use(cors());
@@ -18,8 +19,10 @@ mongoose
     console.log('Database Connected');
   });
 
+// const api = `/.netlify/functions/api`;
+
 // user router
-const userRouter  = require('./route/userRouter');
+const userRouter = require('./route/userRouter');
 app.use('/api', userRouter);
 
 // book slot game router
@@ -30,3 +33,6 @@ app.use('/api', bookGameSlotRouter);
 app.listen(process.env.PORT, () => {
   console.log(`server is running on port ${process.env.PORT}`);
 });
+
+// module.exports = app;
+// module.exports.handler = serverless(app);
